@@ -208,6 +208,7 @@ function startNextExcercise() {
         curExcerciseIndex = 0;
         startTracking();
     } else if (curExcerciseIndex == excercisesForToday.length - 1) {
+        stopTracking();
         showFarewellScreen();
     } else {
         curExcerciseIndex++;
@@ -238,7 +239,7 @@ function showNextExcerciseScreen() {
 
     var text = new UI.Text({
         position: new Vector2(65, 10),
-        size: new Vector2(144, 30),
+        size: new Vector2(60, 30),
         font: 'gothic-24-bold',
         text: excercise.name,
         textAlign: 'center'
@@ -247,11 +248,11 @@ function showNextExcerciseScreen() {
     window.add(text);
 
     var subtitleText = new UI.Text({
-        position: new Vector2(10, 40),
+        position: new Vector2(10, 65),
         size: new Vector2(144, 30),
-        font: 'gothic-18-bold',
-        text: excercise.name,
-        textAlign: 'center'
+        font: 'gothic-22-bold',
+        text: excercise.name + ' for ' + (excercise.duration_text || excercise.repetitions_text),
+        textAlign: 'left'
     });
 
     window.add(subtitleText);
