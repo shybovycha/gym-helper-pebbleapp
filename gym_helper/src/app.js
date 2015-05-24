@@ -11,7 +11,7 @@ var TRAINING_DAY_TITLES = { true: 'Train hard or go home!', false: 'Take a rest 
 var EXCERCISE_PATTERNS = {
     'sitting': { 'dx': -250, 'dy': 50, 'dz': -1000 },
     'staying': { 'dx': 700, 'dy': 100, 'dz': -100 },
-    'walking': { 'dx': 1200, 'dy': 250, 'dz': -100 },
+    'walking': { 'dx': 1000, 'dy': 250, 'dz': -100 },
     'jumping': { 'dx': 700, 'dy': 250, 'dz': 0 },
     'running': { 'dx': 900, 'dy': 100, 'dz': 50 }
 };
@@ -132,6 +132,22 @@ function onAccelerometerCallback(evt) {
     if (!isStartedCurExcercise && isHighMotion()) {
         console.log('DETECTED EXC STARTED');
         isStartedCurExcercise = true; // just started the next excercise
+        
+        if (repetitions === null) {
+            var duration = getCurrentExcercise().duration;
+            
+            Wakeup.schedule({
+                time: Date.now() / 1000 + duration,
+                data: { curExcerciseIndex: curExcerciseIndex }
+            }, function(e) {
+                if (e.failed) {
+                    // Log the error reason
+                    console.log('Wakeup set failed: ' + e.error);
+                } else {
+                    console.log('Wakeup set! Event ID: ' + e.id);
+                }
+            });
+        }
     } else if (isStartedCurExcercise && isLowMotion()) {
         console.log('DETECTED EXC FINISHED');
         startNextExcercise(); // run pause or next excercise
@@ -155,7 +171,7 @@ function setUpAccelerometer() {
 
     Accel.config({
         rate: 100,
-        samples: 25
+        samples: 10
     });
 
     Accel.on('data', onAccelerometerCallback);
