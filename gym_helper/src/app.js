@@ -5,18 +5,18 @@ var Accel = require('ui/accel');
 var Vibe = require('ui/vibe');
 var Wakeup = require('wakeup');
 
-var API_ROOT = 'http://gym-helper-env-j2pgt7yfvp.elasticbeanstalk.com';
+var API_ROOT = 'http://gymhelper-env.elasticbeanstalk.com/';
 var DAYS_OF_WEEK = [ 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday' ];
 var TRAINING_DAY_TITLES = { true: 'Train hard or go home!', false: 'Take a rest for today' };
 var EXCERCISE_PATTERNS = {
     'sitting': { 'dx': -250, 'dy': 50, 'dz': -1000 },
     'staying': { 'dx': 700, 'dy': 100, 'dz': -100 },
-    'walking': { 'dx': 1000, 'dy': 250, 'dz': -100 },
-    'jumping': { 'dx': 1000, 'dy': 250, 'dz': 0 },
-    'running': { 'dx': 1000, 'dy': 100, 'dz': 50 }
+    'walking': { 'dx': 1200, 'dy': 250, 'dz': -100 },
+    'jumping': { 'dx': 700, 'dy': 250, 'dz': 0 },
+    'running': { 'dx': 900, 'dy': 100, 'dz': 50 }
 };
-var MOTION_DETECTION_LAG = 5 * 1000; // 5 seconds of lag
-var SHORT_MOTION_DETECTION_LAG = 300; // 1/3 of second of lag
+var MOTION_DETECTION_LAG = 2 * 1000; // 2 seconds of lag
+var SHORT_MOTION_DETECTION_LAG = 0.75 * 1000; // 3/4 of second of lag
 
 var isReady = false, isTracking = false;
 var averages = null, repetitions = null;
@@ -53,7 +53,7 @@ function detectExcercise() {
         bestFit = null,
         bestMatch = null;
 
-    console.log('detection: ' + JSON.stringify({ 'dx': tx, 'dy': ty, 'dz': tz }));
+    //console.log('detection: ' + JSON.stringify({ 'dx': tx, 'dy': ty, 'dz': tz }));
 
     // find the excercise, which is most likely to match one of the existing patterns
     Object.keys(EXCERCISE_PATTERNS).forEach(function(excerciseName) {
@@ -66,7 +66,7 @@ function detectExcercise() {
         }
     });
 
-    console.log('Best matched: ' + bestMatch);
+    //console.log('Best matched: ' + bestMatch);
 
     return bestMatch;
 }
@@ -130,14 +130,17 @@ function onAccelerometerCallback(evt) {
     trackMovement(evt);
 
     if (!isStartedCurExcercise && isHighMotion()) {
+        console.log('DETECTED EXC STARTED');
         isStartedCurExcercise = true; // just started the next excercise
     } else if (isStartedCurExcercise && isLowMotion()) {
+        console.log('DETECTED EXC FINISHED');
         startNextExcercise(); // run pause or next excercise
     }
 
     // detect the repetitions
     if (repetitions !== null) {
         if (isStartedCurExcercise && isShortMotion()) {
+            console.log('REPETITIONS LEFT:' + JSON.stringify(repetitions));
             repetitions--;
         }
 
@@ -202,7 +205,7 @@ function getPrograms() {
 }
 
 function startNextExcercise() {
-    console.log('Starting next excercise');
+    console.log('STARTING NEXT EXCERCISE');
 
     if (curExcerciseIndex === null) {
         curExcerciseIndex = 0;
@@ -224,7 +227,7 @@ function showNextExcerciseScreen() {
 
     var excercise = getCurrentExcercise();
 
-    console.log('Next excercise will be: ' + excercise.name);
+    console.log('>> NEXT: ' + excercise.name);
 
     var window = new UI.Window({
         fullscreen: true
@@ -238,10 +241,10 @@ function showNextExcerciseScreen() {
     window.add(image);
 
     var text = new UI.Text({
-        position: new Vector2(65, 10),
-        size: new Vector2(60, 30),
+        position: new Vector2(65, 5),
+        size: new Vector2(60, 50),
         font: 'gothic-24-bold',
-        text: excercise.name,
+        text: 'next:\n' + excercise.name,
         textAlign: 'center'
     });
 
@@ -250,7 +253,7 @@ function showNextExcerciseScreen() {
     var subtitleText = new UI.Text({
         position: new Vector2(10, 65),
         size: new Vector2(144, 30),
-        font: 'gothic-22-bold',
+        font: 'gothic-24-bold',
         text: excercise.name + ' for ' + (excercise.duration_text || excercise.repetitions_text),
         textAlign: 'left'
     });
