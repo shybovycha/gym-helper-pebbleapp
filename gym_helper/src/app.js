@@ -132,10 +132,10 @@ function onAccelerometerCallback(evt) {
     if (!isStartedCurExcercise && isHighMotion()) {
         console.log('DETECTED EXC STARTED');
         isStartedCurExcercise = true; // just started the next excercise
-        
+
         if (repetitions === null) {
             var duration = getCurrentExcercise().duration;
-            
+
             Wakeup.schedule({
                 time: Date.now() / 1000 + duration,
                 data: { curExcerciseIndex: curExcerciseIndex }
@@ -171,7 +171,7 @@ function setUpAccelerometer() {
 
     Accel.config({
         rate: 100,
-        samples: 10
+        samples: 20
     });
 
     Accel.on('data', onAccelerometerCallback);
